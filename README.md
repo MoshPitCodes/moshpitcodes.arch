@@ -1,5 +1,6 @@
 <!-- DO NOT TOUCH THIS SECTION#1: START -->
 <div align="center">
+  <img src=".github/assets/logo/nixos-logo.png" alt="moshpitcodes.arch logo" width="180" />
   <h1>moshpitcodes.arch</h1>
   <p>Opinionated Arch/CachyOS dotfiles for a Hyprland desktop and developer workstation.</p>
 
@@ -24,6 +25,10 @@
 - `scripts/` - local utilities, bootstrap helpers, and user services
 - `packages/` - pacman, AUR, Flatpak, and VS Code extension manifests
 - `docs/templates/` - local config templates such as `secrets.env`
+
+<p align="center">
+  <img src=".github/assets/pallet/pallet-0.png" alt="project palette strip" />
+</p>
 
 <br/>
 
@@ -219,6 +224,10 @@ Other resources and links:
 
   - [Hyprland](https://hypr.land/): Wayland compositor used by this setup
   - [GNU Stow](https://www.gnu.org/software/stow/): dotfile deployment mechanism
+
+<p align="center">
+  <img src=".github/assets/pallet/pallet-1.png" alt="project palette swatches" width="720" />
+</p>
 
 <br/>
 
