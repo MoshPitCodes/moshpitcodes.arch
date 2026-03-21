@@ -114,6 +114,13 @@ install_flatpak() {
 	done < <(read_manifest "$repo_root/packages/flatpak.txt")
 }
 
+apply_desktop_preferences() {
+	if [[ -n "${WAYLAND_DISPLAY:-}" || -n "${DISPLAY:-}" ]]; then
+		"$repo_root/scripts/.local/bin/apply-gnome-dconf" >/dev/null 2>&1 || true
+	fi
+
+}
+
 setup_mise() {
 	if ! command -v mise >/dev/null 2>&1; then
 		return
@@ -192,6 +199,7 @@ install_flatpak
 backup_conflicting_targets
 stow_all
 import_local_secrets
+apply_desktop_preferences
 setup_system_services
 setup_user_services
 setup_mise
