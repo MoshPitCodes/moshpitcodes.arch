@@ -28,6 +28,7 @@ swayosd
 ksnip
 blueman
 adwaita-cursors
+adw-gtk-theme
 papirus-icon-theme
 neovim
 code
