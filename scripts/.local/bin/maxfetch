@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+blue=$(tput setaf 4)
+magenta=$(tput setaf 5)
+cyan=$(tput setaf 6)
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+if command -v pacman >/dev/null 2>&1; then
+    pkgs=$(pacman -Qq | wc -l)
+else
+    pkgs=0
+fi
+
+uptime_text=$(uptime -p 2>/dev/null | sed 's/^up //')
+distro=$(sed -nE 's@PRETTY_NAME="([^"]*)"@\1@p' /etc/os-release)
+
+printf '%s%smaxfetch%s\n' "$cyan" "$bold" "$normal"
+printf 'user    %s%s%s\n' "$red" "$(whoami)" "$normal"
+printf 'distro  %s%s%s\n' "$yellow" "$distro" "$normal"
+printf 'kernel  %s%s%s\n' "$green" "$(uname -r)" "$normal"
+printf 'de/wm   %s%s%s\n' "$cyan" "${XDG_CURRENT_DESKTOP:-unknown}" "$normal"
+printf 'uptime  %s%s%s\n' "$blue" "${uptime_text:-unknown}" "$normal"
+printf 'shell   %s%s%s\n' "$magenta" "${SHELL##*/}" "$normal"
+printf 'pkgs    %s%s%s\n' "$red" "$pkgs" "$normal"

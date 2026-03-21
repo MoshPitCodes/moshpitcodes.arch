@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+wallpapers_folder="$HOME/Pictures/wallpapers/randomwallpaper"
+waypaper --folder "$wallpapers_folder" --random &

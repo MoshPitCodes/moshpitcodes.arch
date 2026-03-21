@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
+tmp_file="$(mktemp)"
+seen_file="$(mktemp)"
+trap 'rm -f "$tmp_file" "$seen_file"' EXIT
+
+parse_hypr_file() {
+    local file="$1"
+    [[ -f "$file" ]] || return 0
+
+    if grep -Fqx "$file" "$seen_file" 2>/dev/null; then
+        return 0
+    fi
+    printf '%s\n' "$file" >> "$seen_file"
+
+    awk '
+        /^[[:space:]]*#/ { next }
+        /^[[:space:]]*source[[:space:]]*=/ {
+            line = $0
+            sub(/^[[:space:]]*source[[:space:]]*=[[:space:]]*/, "", line)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", line)
+            print "SOURCE\t" line
+            next
+        }
+        /^[[:space:]]*bind[a-z]*[[:space:]]*=/ {
+            line = $0
+            sub(/^[[:space:]]*bind[a-z]*[[:space:]]*=[[:space:]]*/, "", line)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", line)
+            print "BIND\t" line
+        }
+    ' "$file" | while IFS=$'\t' read -r kind value; do
+        if [[ "$kind" == "SOURCE" ]]; then
+            if [[ "$value" == ~/* ]]; then
+                value="$HOME/${value#~/}"
+            fi
+            parse_hypr_file "$value"
+        elif [[ "$kind" == "BIND" ]]; then
+            printf '%s\n' "$value" >> "$tmp_file"
+        fi
+    done
+}
+
+parse_hypr_file "$config_root/hypr/hyprland.conf"
+parse_hypr_file "$config_root/caelestia/hypr-user.conf"
+
+sed -i 's/,\([^,]*\)$/ = \1/' "$tmp_file"
+sed -i 's/, exec//g' "$tmp_file"
+sed -i 's/^,//g' "$tmp_file"
+sed -i 's/[[:space:]]*#.*$//' "$tmp_file"
+
+if command -v rofi >/dev/null 2>&1; then
+    rofi -dmenu -theme-str 'window {width: 50%;} listview {columns: 1;}' < "$tmp_file"
+elif command -v fzf >/dev/null 2>&1; then
+    fzf --prompt='keybinds > ' --preview 'printf "%s\n" {}' < "$tmp_file"
+else
+    cat "$tmp_file"
+fi

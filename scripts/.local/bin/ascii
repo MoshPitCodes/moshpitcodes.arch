@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+for code in $(seq 0 127); do
+    hex=$(printf '%02X' "$code")
+    if ((code < 32)) || ((code == 127)); then
+        char='CTRL'
+    else
+        char=$(printf "\\$(printf '%03o' "$code")")
+    fi
+    printf '%3d 0x%s %s\n' "$code" "$hex" "$char"
+done

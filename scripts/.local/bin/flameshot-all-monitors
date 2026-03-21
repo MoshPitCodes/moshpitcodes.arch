@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+tmpfile=$(mktemp /tmp/screenshot-XXXXXX.png)
+trap 'rm -f "$tmpfile"' EXIT
+
+grim "$tmpfile"
+ksnip --edit "$tmpfile"

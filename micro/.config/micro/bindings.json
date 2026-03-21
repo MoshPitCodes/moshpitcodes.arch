@@ -1,0 +1,8 @@
+{
+  "CtrlUp": "CursorUp,CursorUp,CursorUp,CursorUp,CursorUp",
+  "CtrlDown": "CursorDown,CursorDown,CursorDown,CursorDown,CursorDown",
+  "CtrlShiftUp": "ScrollUp,ScrollUp,ScrollUp,ScrollUp,ScrollUp",
+  "CtrlShiftDown": "ScrollDown,ScrollDown,ScrollDown,ScrollDown,ScrollDown",
+  "CtrlBackspace": "DeleteWordLeft",
+  "CtrlDelete": "DeleteWordRight"
+}

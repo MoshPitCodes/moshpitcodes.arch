@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if (($# == 0)); then
+    printf 'Usage: %s <archive> [archive...]\n' "$0" >&2
+    exit 1
+fi
+
+for archive in "$@"; do
+    tar -xvzf "$archive"
+done

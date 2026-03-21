@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+wallpaper="${1:-}"
+monitor="${2:-}"
+
+if [[ -z "$wallpaper" ]]; then
+    printf 'Usage: wall-change <path-to-wallpaper> [monitor]\n' >&2
+    exit 1
+fi
+
+if [[ ! -f "$wallpaper" ]]; then
+    printf 'Error: wallpaper file not found: %s\n' "$wallpaper" >&2
+    exit 1
+fi
+
+if ! pgrep -x swww-daemon >/dev/null; then
+    swww-daemon &
+    sleep 1
+fi
+
+if [[ -z "$monitor" ]]; then
+    swww img "$wallpaper" \
+        --transition-type wipe \
+        --transition-duration 2 \
+        --transition-fps 60 \
+        --transition-angle 30 \
+        --transition-step 90
+else
+    swww img --outputs "$monitor" "$wallpaper" \
+        --transition-type wipe \
+        --transition-duration 2 \
+        --transition-fps 60 \
+        --transition-angle 30 \
+        --transition-step 90
+fi

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_path="$(readlink -f "$0")"
+repo_root="$(dirname "$(dirname "$(dirname "$(dirname "$script_path")")")")"
+manifest="$repo_root/packages/vscode-extensions.txt"
+
+if [[ ! -f "$manifest" ]]; then
+  echo "Missing extension manifest: $manifest" >&2
+  exit 1
+fi
+
+if command -v codium >/dev/null 2>&1; then
+  installer="codium"
+elif command -v code >/dev/null 2>&1; then
+  installer="code"
+else
+  echo "Neither codium nor code is installed" >&2
+  exit 1
+fi
+
+while IFS= read -r extension; do
+  [[ -n "$extension" ]] || continue
+  [[ "$extension" =~ ^# ]] && continue
+  "$installer" --install-extension "$extension" --force
+done < "$manifest"

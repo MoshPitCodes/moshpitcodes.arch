@@ -1,0 +1,35 @@
+[general]
+bars = 64
+framerate = 60
+autosens = 1
+overshoot = 0
+
+[input]
+method = pulse
+source = auto
+
+[output]
+method = ncurses
+style = stereo
+
+[color]
+gradient = 1
+gradient_count = 5
+gradient_color_1 = '#83c092'
+gradient_color_2 = '#7fbbb3'
+gradient_color_3 = '#a7c080'
+gradient_color_4 = '#dbbc7f'
+gradient_color_5 = '#e67e80'
+
+[smoothing]
+noise_reduction = 85
+monstercat = 1
+waves = 0
+gravity = 120
+
+[eq]
+1 = 0.8
+2 = 0.9
+3 = 1.0
+4 = 1.1
+5 = 1.2

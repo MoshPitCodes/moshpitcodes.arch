@@ -1,0 +1,120 @@
+{
+  "layer": "top",
+  "position": "top",
+  "spacing": 0,
+  "reload_style_on_change": true,
+  "modules-left": ["hyprland/workspaces", "custom/filemanager", "cpu"],
+  "modules-center": ["clock"],
+  "modules-right": [
+    "custom/easyeffects",
+    "pulseaudio",
+    "network",
+    "bluetooth",
+    "tray",
+    "custom/notification"
+  ],
+  "hyprland/workspaces": {
+    "on-scroll-up": "hyprctl dispatch workspace r-1",
+    "on-scroll-down": "hyprctl dispatch workspace r+1",
+    "on-click": "activate",
+    "active-only": false,
+    "all-outputs": false,
+    "format": "{icon}",
+    "format-icons": {
+      "1": "●",
+      "2": "●",
+      "3": "●",
+      "4": "●",
+      "5": "●",
+      "6": "●",
+      "7": "●",
+      "8": "●",
+      "9": "●",
+      "active": "●",
+      "default": "○",
+      "urgent": "!"
+    },
+    "persistent-workspaces": {
+      "HDMI-A-1": [1, 2, 3],
+      "DP-1": [4, 5, 6],
+      "DP-2": [7, 8, 9]
+    }
+  },
+  "clock": {
+    "format": "{:%H:%M:%S  -  %A, %d}",
+    "format-alt": "{:%d/%m/%Y}",
+    "tooltip": false,
+    "interval": 1
+  },
+  "cpu": {
+    "interval": 1,
+    "format": "  {icon0}{icon1}{icon2}{icon3} {usage:>2}%",
+    "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"],
+    "on-click": "ghostty -e btop"
+  },
+  "custom/easyeffects": {
+    "format": "󰺢",
+    "on-click": "easyeffects",
+    "tooltip-format": "Audio Effects"
+  },
+  "pulseaudio": {
+    "scroll-step": 1,
+    "format": "{icon} {volume}%",
+    "format-muted": "",
+    "format-icons": {
+      "default": ["", "", " "]
+    },
+    "tooltip-format": "Playing at {volume}%",
+    "on-click": "pamixer -t",
+    "on-click-right": "pavucontrol"
+  },
+  "network": {
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "format": "⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}",
+    "format-wifi": "󰖩 ⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}",
+    "format-ethernet": "󰈀 ⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}",
+    "format-disconnected": "󰖪",
+    "tooltip-format-wifi": "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-ethernet": "⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-disconnected": "Disconnected",
+    "on-click": "nm-connection-editor",
+    "interval": 3,
+    "spacing": 1
+  },
+  "bluetooth": {
+    "format": "󰂯",
+    "format-disabled": "󰂲",
+    "format-connected": "󰂱",
+    "tooltip-format": "Devices connected: {num_connections}",
+    "on-click": "blueman-manager"
+  },
+  "tray": {
+    "icon-size": 21,
+    "spacing": 10
+  },
+  "custom/filemanager": {
+    "format": "󰉋",
+    "on-click": "nautilus --new-window",
+    "tooltip-format": "Open Filemanager"
+  },
+  "custom/notification": {
+    "tooltip": false,
+    "format": "{icon} ",
+    "format-icons": {
+      "notification": "<span foreground='#f7768e'>󰂞</span>",
+      "none": "<span foreground='#9ece6a'>󰂚</span>",
+      "dnd-notification": "<span foreground='#f7768e'>󰂞</span>",
+      "dnd-none": "<span foreground='#9ece6a'>󰂚</span>",
+      "inhibited-notification": "<span foreground='#f7768e'>󰂞</span>",
+      "inhibited-none": "<span foreground='#9ece6a'>󰂚</span>",
+      "dnd-inhibited-notification": "<span foreground='#f7768e'>󰂞</span>",
+      "dnd-inhibited-none": "<span foreground='#9ece6a'>󰂚</span>"
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  }
+}

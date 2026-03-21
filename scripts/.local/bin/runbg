@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if (($# == 0)); then
+    printf '%s: missing command\n' "$(basename "$0")" >&2
+    exit 1
+fi
+
+prog="$(command -v "$1" || true)"
+if [[ -z "$prog" ]]; then
+    printf '%s: unknown command: %s\n' "$(basename "$0")" "$1" >&2
+    exit 1
+fi
+
+shift
+tty -s && exec < /dev/null
+tty -s <&1 && exec > /dev/null
+tty -s <&2 && exec 2>&1
+"$prog" "$@" &

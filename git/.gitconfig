@@ -1,0 +1,66 @@
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = true
+
+[push]
+    autoSetupRemote = true
+
+[core]
+    editor = vim
+    autocrlf = input
+    pager = delta
+    sshCommand = ssh -o IdentitiesOnly=yes -i ~/.ssh/id_ed25519_github
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default
+
+[user]
+    signingkey = ~/.ssh/id_ed25519_github.pub
+
+[commit]
+    gpgsign = true
+
+[gpg]
+    format = ssh
+
+[gpg "ssh"]
+    program = /usr/bin/ssh-keygen
+    allowedSignersFile = ~/.ssh/allowed_signers
+
+[credential]
+    helper = /usr/lib/git-core/git-credential-libsecret
+
+[delta]
+    navigate = true
+    line-numbers = true
+    side-by-side = true
+
+[alias]
+    st = status
+    co = checkout
+    br = branch
+    ci = commit
+    lg = log --oneline --graph --decorate
+    gm = merge
+    gcl = clone
+    gcm = commit -m
+    gtag = tag -ma
+    glog = log --oneline --decorate --graph
+    glol = log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'
+    glola = log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --all
+    glols = log --graph --pretty='%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset' --stat
+    gf = !onefetch --number-of-file-churns 0 --no-color-palette
+
+[include]
+    path = ~/.gitconfig.local
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential

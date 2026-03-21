@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_path="$(readlink -f "$0")"
+repo_root="$(dirname "$(dirname "$(dirname "$(dirname "$script_path")")")")"
+source_userjs="$repo_root/firefox/.config/firefox/user.js"
+firefox_dir="${HOME}/.mozilla/firefox"
+
+if [[ ! -f "$source_userjs" ]]; then
+  echo "Missing Firefox user.js source: $source_userjs" >&2
+  exit 1
+fi
+
+if [[ ! -d "$firefox_dir" ]]; then
+  echo "Firefox profile directory not found at $firefox_dir" >&2
+  exit 1
+fi
+
+shopt -s nullglob
+profiles=("$firefox_dir"/*.default* "$firefox_dir"/*.default-release*)
+
+if [[ ${#profiles[@]} -eq 0 ]]; then
+  echo "No Firefox profiles found in $firefox_dir" >&2
+  exit 1
+fi
+
+for profile in "${profiles[@]}"; do
+  install -Dm644 "$source_userjs" "$profile/user.js"
+  echo "Installed user.js into $profile"
+done

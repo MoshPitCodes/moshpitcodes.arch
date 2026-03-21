@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+rofi -show power -modi "power:rofi-power-menu --choices=shutdown/lockscreen/logout/suspend/reboot" -theme-str 'window {width: 12em; height: 20em;} listview {lines: 6;}'
