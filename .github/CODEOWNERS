@@ -1,0 +1,45 @@
+# CODEOWNERS for moshpitcodes.arch
+#
+# This file defines default reviewers for changes in this repository.
+
+# Default owner for everything in the repo
+* @MoshPitCodes
+
+# Documentation
+*.md @MoshPitCodes
+/docs/ @MoshPitCodes
+/specs/ @MoshPitCodes
+
+# Bootstrap and package manifests
+/bootstrap.sh @MoshPitCodes
+/packages/ @MoshPitCodes
+
+# Desktop environment and UI config
+/hyprland/ @MoshPitCodes
+/hypridle/ @MoshPitCodes
+/hyprlock/ @MoshPitCodes
+/rofi/ @MoshPitCodes
+/swaync/ @MoshPitCodes
+/waybar/ @MoshPitCodes
+/waypaper/ @MoshPitCodes
+
+# Shell, terminal, editors, and tools
+/fish/ @MoshPitCodes
+/foot/ @MoshPitCodes
+/ghostty/ @MoshPitCodes
+/git/ @MoshPitCodes
+/micro/ @MoshPitCodes
+/mise/ @MoshPitCodes
+/neovim/ @MoshPitCodes
+/starship/ @MoshPitCodes
+/tmux/ @MoshPitCodes
+/vscode/ @MoshPitCodes
+/yazi/ @MoshPitCodes
+
+# Scripts and GitHub configuration
+/scripts/ @MoshPitCodes
+/.github/ @MoshPitCodes
+
+# Dotfile policy and repo metadata
+.gitignore @MoshPitCodes
+README.md @MoshPitCodes

@@ -1,0 +1,69 @@
+* {
+  font-family: "FiraCode Nerd Font";
+  font-size: 11px;
+}
+
+.control-center {
+  background: rgba(26, 27, 38, 0.95);
+  border-radius: 5px;
+  border: 2px solid #292e42;
+  margin: 10px;
+  padding: 10px;
+}
+
+.notification-row {
+  outline: none;
+}
+
+.notification {
+  border-radius: 5px;
+  margin: 5px 0px;
+  padding: 0px;
+  background: #292e42;
+  border: 1px solid #292e42;
+}
+
+.notification-content {
+  padding: 10px;
+}
+
+.close-button {
+  background: #7aa2f7;
+  color: #1a1b26;
+  border-radius: 50%;
+  padding: 2px;
+  margin: 5px;
+}
+
+.notification-default-action:hover {
+  background: #292e42;
+}
+
+.widget-title {
+  color: #c0caf5;
+  font-weight: bold;
+  font-size: 14px;
+  margin: 5px 10px;
+}
+
+.widget-title button {
+  background: #7aa2f7;
+  color: #1a1b26;
+  border-radius: 5px;
+  padding: 4px 12px;
+  border: none;
+}
+
+.widget-dnd {
+  color: #c0caf5;
+  margin: 5px 10px;
+}
+
+.widget-dnd > switch {
+  border-radius: 5px;
+  background: #292e42;
+}
+
+.widget-dnd > switch:checked {
+  background: #7aa2f7;
+}

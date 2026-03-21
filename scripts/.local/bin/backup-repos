@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source_dir="${BACKUP_REPOS_SOURCE:-$HOME/Development}"
+dest_root="${BACKUP_REPOS_DEST:-}"
+host_name="${BACKUP_REPOS_HOST:-$(hostnamectl hostname 2>/dev/null || hostname)}"
+log_file="${XDG_STATE_HOME:-$HOME/.local/state}/backup-repos.log"
+
+mkdir -p "$(dirname "$log_file")"
+
+log() {
+    printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" | tee -a "$log_file"
+}
+
+if [[ -z "$dest_root" ]]; then
+    log "ERROR: set BACKUP_REPOS_DEST before running backup-repos"
+    exit 1
+fi
+
+if [[ ! -d "$source_dir" ]]; then
+    log "ERROR: source directory $source_dir does not exist"
+    exit 1
+fi
+
+if [[ ! -d "$dest_root" && ! -L "$dest_root" ]]; then
+    log "WARNING: destination $dest_root is not available"
+    exit 0
+fi
+
+dest_dir="$dest_root/$host_name"
+mkdir -p "$dest_dir"
+
+log "Starting backup: $source_dir -> $dest_dir"
+
+rsync -rltv --delete \
+    --no-perms --no-owner --no-group \
+    --chmod=D755,F644 \
+    --exclude='node_modules/' \
+    --exclude='target/' \
+    --exclude='.direnv/' \
+    --exclude='result' \
+    --exclude='.git/objects/' \
+    --exclude='*.lock' \
+    --temp-dir=/tmp \
+    "$source_dir/" "$dest_dir/" 2>&1 | tee -a "$log_file"
+
+log "Backup completed successfully"

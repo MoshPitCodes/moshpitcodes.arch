@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if (($# != 1)); then
+    printf 'Usage: %s <path>\n' "$0" >&2
+    exit 1
+fi
+
+tar -cvzf "$1.tar.gz" "$1"

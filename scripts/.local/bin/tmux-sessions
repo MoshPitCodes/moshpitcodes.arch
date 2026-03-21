@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+show_help() {
+    cat <<'EOF'
+tmux-sessions - Create and manage tmux sessions with simple 2-panel layout
+
+USAGE:
+    tmux-sessions <session-name>
+    tmux-sessions --help
+    tmux-sessions --list
+
+DESCRIPTION:
+    Create a tmux session with 2 horizontal panels (left/right split).
+    If the session already exists, attach to it.
+EOF
+}
+
+list_sessions() {
+    printf 'Active tmux sessions:\n====================\n'
+    tmux list-sessions 2>/dev/null || printf '(none)\n'
+}
+
+validate_session_name() {
+    local name="$1"
+
+    if [[ -z "$name" ]]; then
+        printf 'Error: Session name cannot be empty.\n\n' >&2
+        show_help
+        exit 1
+    fi
+
+    if [[ "$name" =~ [[:space:]] ]]; then
+        printf 'Error: Session name cannot contain spaces.\n' >&2
+        exit 1
+    fi
+
+    if [[ ! "$name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        printf 'Error: Session name contains invalid characters.\n' >&2
+        exit 1
+    fi
+}
+
+create_session() {
+    local name="$1"
+
+    if tmux has-session -t "$name" 2>/dev/null; then
+        if [[ -z "${TMUX:-}" ]]; then
+            exec tmux attach-session -t "$name"
+        else
+            tmux switch-client -t "$name"
+        fi
+    else
+        tmux new-session -d -s "$name"
+        tmux split-window -h -t "$name"
+        tmux select-pane -t "$name:1.1"
+        if [[ -z "${TMUX:-}" ]]; then
+            exec tmux attach-session -t "$name"
+        else
+            tmux switch-client -t "$name"
+        fi
+    fi
+}
+
+case "${1:-}" in
+    --help|-h)
+        show_help
+        ;;
+    --list|-l)
+        list_sessions
+        ;;
+    '')
+        printf 'Error: No session name provided.\n\n' >&2
+        show_help
+        exit 1
+        ;;
+    -*)
+        printf 'Error: Unknown option: %s\n\n' "$1" >&2
+        show_help
+        exit 1
+        ;;
+    *)
+        validate_session_name "$1"
+        create_session "$1"
+        ;;
+esac

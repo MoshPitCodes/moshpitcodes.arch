@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_path="$(readlink -f "$0")"
+repo_root="$(dirname "$(dirname "$(dirname "$(dirname "$script_path")")")")"
+config_file="$repo_root/gnome/.config/dconf/user.conf"
+
+if ! command -v dconf >/dev/null 2>&1; then
+  echo "dconf is not installed" >&2
+  exit 1
+fi
+
+if [[ ! -f "$config_file" ]]; then
+  echo "Missing dconf config: $config_file" >&2
+  exit 1
+fi
+
+dconf load / < "$config_file"
+echo "Applied GNOME dconf settings from $config_file"

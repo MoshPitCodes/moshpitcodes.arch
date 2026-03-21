@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+config_dir="$HOME/.config/waybar"
+host_file="$HOME/.config/hypr/host.conf"
+host="default"
+
+if [[ -f "$host_file" ]]; then
+    host="$(python - "$host_file" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+text = Path(sys.argv[1]).read_text()
+match = re.search(r'^\s*source\s*=\s*(.+?/)?([A-Za-z0-9_-]+)\.conf\s*$', text, re.M)
+print(match.group(2) if match else 'default')
+PY
+)"
+fi
+
+config_file="$config_dir/config.$host.jsonc"
+if [[ ! -f "$config_file" ]]; then
+    config_file="$config_dir/config.jsonc"
+fi
+
+pkill waybar >/dev/null 2>&1 || true
+exec waybar -c "$config_file"

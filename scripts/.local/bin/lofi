@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if pgrep -x mpv >/dev/null; then
+    pkill mpv
+else
+    runbg mpv --no-video 'https://www.youtube.com/live/jfKfPfyJRdk?si=OF0HKrYFFj33BzMo'
+fi

@@ -1,0 +1,12 @@
+[tools]
+node = "lts"
+python = "3.12"
+go = "1.25"
+rust = "stable"
+bun = "latest"
+terraform = "latest"
+kubectl = "latest"
+helm = "latest"
+
+[settings]
+idiomatic_version_file_enable_tools = ["python"]

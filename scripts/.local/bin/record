@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+tmp_file_unoptimized="/tmp/recording_unoptimized.gif"
+tmp_palette_file="/tmp/palette.png"
+tmp_mp4_file="/tmp/recording.mp4"
+tmp_gif_result="/tmp/gif_result"
+gif_marker="/tmp/recording_gif"
+app_name="Recorder"
+out_dir="$HOME/Videos"
+filename="$(date +'%Y-%m-%d_%H-%M-%S')"
+
+mkdir -p "$out_dir"
+
+is_recorder_running() {
+    pgrep -x wf-recorder >/dev/null
+}
+
+cleanup_tmp() {
+    rm -f "$tmp_file_unoptimized" "$tmp_palette_file" "$tmp_gif_result" "$tmp_mp4_file" "$gif_marker"
+}
+
+notify() {
+    notify-send -a "$app_name" "$1" "$2" -t 5000
+}
+
+convert_to_gif() {
+    ffmpeg -i "$tmp_mp4_file" -filter_complex '[0:v] palettegen' "$tmp_palette_file"
+    ffmpeg -i "$tmp_mp4_file" -i "$tmp_palette_file" -filter_complex '[0:v] fps=10,scale=1400:-1,setpts=0.5*PTS [new];[new][1:v] paletteuse' "$tmp_file_unoptimized"
+    rm -f "$tmp_palette_file" "$tmp_mp4_file"
+    gifsicle -O3 --lossy=100 -i "$tmp_file_unoptimized" -o "$tmp_gif_result"
+    rm -f "$tmp_file_unoptimized"
+}
+
+record_screen() {
+    notify 'Starting Recording' 'Your screen is being recorded'
+    timeout 600 wf-recorder -F format=rgb24 -x rgb24 -p qp=0 -p crf=0 -p preset=slow -c libx264rgb -f "$tmp_mp4_file"
+}
+
+record_area() {
+    geometry="$(slurp)"
+    if [[ -n "$geometry" ]]; then
+        notify 'Starting Recording' 'Your screen is being recorded'
+        timeout 600 wf-recorder -F format=rgb24 -x rgb24 -p qp=0 -p crf=0 -p preset=slow -c libx264rgb -g "$geometry" -f "$tmp_mp4_file"
+    fi
+}
+
+record_gif() {
+    touch "$gif_marker"
+    record_area
+}
+
+stop_recording() {
+    local save_path
+
+    if ! is_recorder_running; then
+        return 0
+    fi
+
+    kill "$(pgrep -x wf-recorder)"
+
+    if [[ -f "$gif_marker" ]]; then
+        notify 'Stopped Recording' 'Starting GIF conversion phase...'
+        convert_to_gif
+        save_path="$(zenity --file-selection --save --file-filter='*.gif' --filename="$out_dir/.gif" || true)"
+        if [[ -z "$save_path" ]]; then
+            save_path="$out_dir/$filename.gif"
+        fi
+        [[ "$save_path" == *.gif ]] || save_path+='.gif'
+        mv "$tmp_gif_result" "$save_path"
+        wl-copy -t image/png < "$save_path"
+        notify 'GIF conversion completed' "GIF saved to $save_path"
+    else
+        save_path="$(zenity --file-selection --save --file-filter='*.mp4' --filename="$out_dir/.mp4" || true)"
+        if [[ -z "$save_path" ]]; then
+            save_path="$out_dir/$filename.mp4"
+        fi
+        [[ "$save_path" == *.mp4 ]] || save_path+='.mp4'
+        mv "$tmp_mp4_file" "$save_path"
+        wl-copy -t video/mp4 < "$save_path"
+        notify 'Stopped Recording' "Video saved to $save_path"
+    fi
+
+    cleanup_tmp
+}
+
+if is_recorder_running; then
+    stop_recording
+    exit 0
+fi
+
+if [[ "${1:-}" != 'stop' ]]; then
+    cleanup_tmp
+fi
+
+case "${1:-}" in
+    screen)
+        record_screen
+        ;;
+    area)
+        record_area
+        ;;
+    gif)
+        record_gif
+        ;;
+    stop)
+        stop_recording
+        ;;
+    *)
+        printf 'Usage: %s {screen|area|gif|stop}\n' "$0" >&2
+        exit 1
+        ;;
+esac

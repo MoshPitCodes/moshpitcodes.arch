@@ -1,0 +1,13 @@
+.DS_Store
+
+# Local secrets
+ssh/
+gpg/
+
+# Local editor/runtime artifacts
+fish/.config/fish/fish_variables
+micro/.config/micro/buffers/
+vscode/.config/VSCodium/CachedProfilesData/
+
+# Local OpenCode runtime data
+.opencode/

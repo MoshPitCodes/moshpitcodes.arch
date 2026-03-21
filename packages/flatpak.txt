@@ -1,0 +1,2 @@
+# Add optional GUI apps here if you prefer Flatpak over pacman/AUR.
+com.github.tchx84.Flatseal

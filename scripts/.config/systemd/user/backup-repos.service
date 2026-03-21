@@ -1,0 +1,9 @@
+[Unit]
+Description=Backup Development repositories to NAS
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/backup-repos
+Restart=on-failure
+RestartSec=5min

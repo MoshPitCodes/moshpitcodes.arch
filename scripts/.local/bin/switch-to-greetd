@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ((EUID != 0)); then
+    printf 'Run as root: sudo %s\n' "$0" >&2
+    exit 1
+fi
+
+packages=(
+    greetd
+    greetd-tuigreet
+)
+
+remove_packages=(
+    plasma-login-manager
+    sddm
+    cachyos-themes-sddm
+    cachyos-iridescent-kde
+    cachyos-kde-settings
+    plasma-desktop
+    plasma-workspace
+    plasma-browser-integration
+    plasma-firewall
+    plasma-nm
+    plasma-pa
+    plasma-systemmonitor
+    plasma-thunderbolt
+    plasma5support
+    xdg-desktop-portal-kde
+    kactivitymanagerd
+    kded
+    kde-cli-tools
+    kde-gtk-config
+    kdeplasma-addons
+    kglobalacceld
+    kmenuedit
+    knighttime
+    kscreen
+    kscreenlocker
+    kwallet-pam
+    kwin
+    libplasma
+    milou
+    polkit-kde-agent
+    powerdevil
+    qqc2-breeze-style
+    signon-kwallet-extension
+    systemsettings
+    bluedevil
+    breeze
+    breeze-cursors
+    breeze-gtk
+)
+
+pacman -Syu --needed --noconfirm "${packages[@]}"
+
+install -d -m 0755 /etc/greetd
+cat > /etc/greetd/config.toml <<'EOF'
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --time --remember --remember-user-session --asterisks --sessions /usr/share/wayland-sessions"
+user = "greeter"
+EOF
+
+systemctl disable --now display-manager.service 2>/dev/null || true
+systemctl disable --now plasmalogin.service 2>/dev/null || true
+systemctl disable --now sddm.service 2>/dev/null || true
+systemctl enable --now greetd.service
+
+installed_remove_packages=()
+for pkg in "${remove_packages[@]}"; do
+    if pacman -Qq "$pkg" >/dev/null 2>&1; then
+        installed_remove_packages+=("$pkg")
+    fi
+done
+
+if ((${#installed_remove_packages[@]})); then
+    pacman -Rns --noconfirm "${installed_remove_packages[@]}"
+fi
+
+printf 'Switched to greetd. Reboot or log out to test the new login flow.\n'
+printf 'KDE apps like Dolphin/Kate/Konsole were not targeted for removal.\n'

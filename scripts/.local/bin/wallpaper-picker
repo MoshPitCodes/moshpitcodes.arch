@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+wallpapers_folder="$HOME/Pictures/wallpapers"
+wallpaper_name="$(ls "$wallpapers_folder" | rofi -dmenu || pkill rofi)"
+
+if [[ -f "$wallpapers_folder/$wallpaper_name" ]]; then
+    waypaper --wallpaper "$wallpapers_folder/$wallpaper_name"
+else
+    exit 1
+fi
