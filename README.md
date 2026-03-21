@@ -1,7 +1,7 @@
 <!-- DO NOT TOUCH THIS SECTION#1: START -->
 <div align="center">
   <h1>moshpitcodes.arch</h1>
-  <p>Personal Arch/CachyOS dotfiles for a Hyprland desktop.</p>
+  <p>Opinionated Arch/CachyOS dotfiles for a Hyprland desktop and developer workstation.</p>
 
   [![Stars](https://img.shields.io/github/stars/MoshPitCodes/moshpitcodes.arch?style=social)](https://github.com/MoshPitCodes/moshpitcodes.arch)
 </div>
@@ -11,57 +11,86 @@
 
 # 🗃️ Overview
 
-`moshpitcodes.arch` is a Stow-managed dotfiles repo for a Hyprland-based Arch/CachyOS setup. It bundles desktop configuration, shell/editor tooling, bootstrap scripts, and small local setup helpers.
+`moshpitcodes.arch` is a GNU Stow-based dotfiles repo for a Hyprland setup with batteries-included shell, editor, theming, and desktop automation. It keeps shared config in the repo and pushes machine-specific identity and secrets into local files at setup time.
 
 <br/>
 
 ## 📚 Project Structure
 
-- `hyprland/` - Hyprland config, host overlays, keybinds, and startup behavior
-- `scripts/` - local CLI helpers and user systemd units
-- `packages/` - package manifests for pacman, AUR, Flatpak, and VS Code extensions
-- `gnome/`, `rofi/`, `waybar/`, `waypaper/` - desktop theming and app configuration
-- `git/`, `fish/`, `foot/`, `ghostty/`, `tmux/`, `neovim/`, `vscode/` - developer environment config
-- `docs/templates/` - local setup templates for secrets and project docs
+- `hyprland/`, `hypridle/`, `hyprlock/` - compositor, idle, and lockscreen config
+- `waybar/`, `rofi/`, `swaync/`, `swayosd/`, `waypaper/` - desktop UI and interaction layer
+- `fish/`, `git/`, `gnome/`, `xdg/` - shell, Git, GTK, and shared desktop defaults
+- `neovim/`, `vscode/`, `tmux/`, `foot/`, `ghostty/`, `micro/` - developer environment
+- `scripts/` - local utilities, bootstrap helpers, and user services
+- `packages/` - pacman, AUR, Flatpak, and VS Code extension manifests
+- `docs/templates/` - local config templates such as `secrets.env`
 
 <br/>
 
 ## 📓 Project Components
+
 | Component | Responsibility |
 | --------------------------- | :---------------------------------------------------------------------------------- |
-| **Bootstrap** | Installs packages, restows dotfiles, and runs local setup helpers. |
-| **Desktop** | Configures Hyprland, notifications, bars, wallpaper, lockscreen, and theming. |
-| **Shell & Git** | Sets up Fish, Starship, Git defaults, SSH signing, and local identity hooks. |
-| **Editors** | Configures Neovim, VS Code, Micro, and terminal tooling. |
-| **Secrets Import** | Pulls SSH, GPG, and local Git identity from machine-specific locations. |
+| **Bootstrap** | Installs packages, restows dotfiles, and runs local import helpers. |
+| **Desktop Session** | Configures Hyprland, bars, notifications, wallpapers, launchers, and lockscreen behavior. |
+| **Shell & Git** | Sets up Fish, Starship, Git defaults, SSH signing, and credential flow. |
+| **Editors & Terminals** | Configures Neovim, VS Code, Micro, tmux, Foot, and Ghostty. |
+| **Local Imports** | Imports SSH keys, GPG data, and machine-specific Git identity into the home directory. |
 
 <br/>
 
 # 📐 Architecture
 
-```text
-packages/ -----> bootstrap.sh -----> stow packages into $HOME
-                         |
-                         +-----> scripts/.local/bin/import-secrets
-                         |
-                         +-----> user services / desktop helpers
+```mermaid
+flowchart TD
+    A[bootstrap.sh] --> B[Install packages from packages/]
+    A --> C[Restow config packages into HOME]
+    A --> D[Run import-secrets]
+    A --> E[Enable user services]
 
-hyprland/ + waybar/ + rofi/ + waypaper/ ---> desktop session
-fish/ + git/ + ssh/ + gpg/               ---> shell and Git workflow
-neovim/ + vscode/ + tmux/                ---> dev environment
+    C --> F[Desktop config]
+    C --> G[Shell and Git config]
+    C --> H[Editor and terminal config]
+
+    D --> I[~/.ssh]
+    D --> J[~/.gnupg]
+    D --> K[~/.gitconfig.local]
+
+    F --> L[Hyprland session]
+    G --> M[Interactive shell workflow]
+    H --> N[Developer workstation]
 ```
 
 ```mermaid
-flowchart TD
-    A[bootstrap.sh] --> B[Install packages]
-    A --> C[Stow dotfiles]
-    A --> D[Import local secrets]
-    C --> E[Desktop config]
-    C --> F[Shell and Git config]
-    C --> G[Editor config]
-    D --> H[~/.ssh]
-    D --> I[~/.gnupg]
-    D --> J[~/.gitconfig.local]
+flowchart LR
+    A[hyprland/] --> B[Window management]
+    C[waybar/] --> D[Status bar]
+    E[rofi/] --> F[Launchers and menus]
+    G[swaync/ + swayosd/] --> H[Notifications and OSD]
+    I[waypaper/ + wallpapers/] --> J[Wallpaper workflow]
+
+    B --> K[Desktop experience]
+    D --> K
+    F --> K
+    H --> K
+    J --> K
+```
+
+```mermaid
+flowchart LR
+    A[git/.gitconfig] --> B[Shared Git defaults]
+    C[fish/.config/fish] --> D[Interactive shell setup]
+    E[scripts/.local/bin/import-secrets] --> F[Local machine state]
+
+    F --> G[~/.ssh]
+    F --> H[~/.gnupg]
+    F --> I[~/.gitconfig.local]
+
+    B --> J[Git workflow]
+    D --> J
+    G --> J
+    H --> J
+    I --> J
 ```
 
 <br/>
@@ -69,10 +98,10 @@ flowchart TD
 # 🚀 **Getting Started**
 
 > [!CAUTION]
-> These dotfiles change desktop, shell, and system-adjacent user configuration. Review anything you do not understand before applying it.
+> These dotfiles modify your desktop session, shell behavior, editor defaults, and user-level services. Review the repo before applying it on a machine you care about.
 
 > [!WARNING]
-> You should adjust host-specific paths, secrets sources, and application choices before using this setup on another machine.
+> Paths, hosts, secrets sources, monitor layouts, and app choices are personal defaults. Adjust them before running the full bootstrap.
 
 <br/>
 
@@ -80,15 +109,18 @@ flowchart TD
 
 ### Prerequisites
 
-- Arch or CachyOS
+- Arch Linux or CachyOS
 - `git`
-- network access for package installation
+- working network access
+- sudo access for package installation
 
 ### Installation
 
 1. Clone the repository.
-2. Review `packages/`, `bootstrap.sh`, and `docs/templates/secrets.env.template`.
-3. Run `./bootstrap.sh`.
+2. Review `bootstrap.sh`, `packages/`, and `docs/templates/secrets.env.template`.
+3. Populate your local `secrets.env` file.
+4. Run `./bootstrap.sh`.
+
 <br/>
 
 ## 2. **Clone**
@@ -101,24 +133,52 @@ cd moshpitcodes.arch
 <br/>
 
 ## 3. **Local Setup**
+
 > [!TIP]
-> Keep private keys and machine-specific identity outside the repository. Use the provided template and importer instead of committing secrets.
+> Treat SSH keys, GPG data, and Git identity as local machine state. Import them into your home directory instead of storing them in the repository.
 
 ### Secrets
 
-Copy `docs/templates/secrets.env.template` to `~/.config/moshpitcodes/secrets.env`, then fill in your local SSH, GPG, and Git identity values.
+Copy `docs/templates/secrets.env.template` to `~/.config/moshpitcodes/secrets.env` and fill in your local values for:
+
+- `SSH_SOURCE_DIR`
+- `SSH_KEYS`
+- `GPG_SOURCE_DIR`
+- `GIT_USER_NAME`
+- `GIT_USER_EMAIL`
 
 <br/>
 
 ### Bootstrap
 
-Run `./bootstrap.sh` for the full setup, or use `stow --target="$HOME" --restow <package>` for individual packages.
+Run the full setup:
+
+```bash
+./bootstrap.sh
+```
+
+Or restow an individual package:
+
+```bash
+stow --target="$HOME" --restow hyprland
+```
 
 <br/>
 
 ### Git Identity
 
-Run `import-secrets --git-only` to generate `~/.gitconfig.local` from your local config values.
+Generate local Git identity from your configured values:
+
+```bash
+import-secrets --git-only
+```
+
+Verify it with:
+
+```bash
+git config --get user.name
+git config --get user.email
+```
 
 <br/>
 
@@ -126,30 +186,31 @@ Run `import-secrets --git-only` to generate `~/.gitconfig.local` from your local
 
 <details>
 <summary>
-Hosts
+Host overlays
 </summary>
 
-`hyprland/.config/hypr/host.conf` selects the active host overlay.
+`hyprland/.config/hypr/host.conf` selects the active host profile, and `hyprland/.config/hypr/hosts/` contains the per-machine overrides.
 
 </details>
 
 <details>
 <summary>
-Secrets
+Secrets handling
 </summary>
 
-SSH and GPG material are imported into your home directory and are meant to stay out of git.
+`import-secrets` imports SSH keys to `~/.ssh`, GPG data to `~/.gnupg`, and local Git identity to `~/.gitconfig.local`. Those files are intended to stay outside version control.
 
 </details>
 
 <details>
 <summary>
-Rulesets
+Repository governance
 </summary>
 
-Repository governance rules live in `.github/rulesets/`.
+GitHub rulesets, templates, and ownership files live in `.github/` so the repo can be managed through pull requests and signed commits.
 
 </details>
+
 <br/>
 
 # 👥 Credits
