@@ -20,17 +20,13 @@
     colorMoved = default
 
 [user]
-    signingkey = ~/.ssh/id_ed25519_github.pub
+    signingkey = 2827290D9EFD99E4F8B7F05081322B518F331E00
 
 [commit]
     gpgsign = true
 
 [gpg]
-    format = ssh
-
-[gpg "ssh"]
-    program = /usr/bin/ssh-keygen
-    allowedSignersFile = ~/.ssh/allowed_signers
+    format = openpgp
 
 [credential]
     helper = /usr/lib/git-core/git-credential-libsecret
