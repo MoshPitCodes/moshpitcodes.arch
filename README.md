@@ -1,6 +1,6 @@
 <!-- DO NOT TOUCH THIS SECTION#1: START -->
 <div align="center">
-  <img src=".github/assets/logo/nixos-logo.png" alt="moshpitcodes.arch logo" width="180" />
+  <img src=".github/assets/logo/arch-logo.png" alt="moshpitcodes.arch logo" width="180" />
   <h1>moshpitcodes.arch</h1>
   <p>Opinionated Arch/CachyOS dotfiles for a Hyprland desktop and developer workstation.</p>
 
