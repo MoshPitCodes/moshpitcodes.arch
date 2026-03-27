@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
 wallpapers_folder="$HOME/Pictures/wallpapers/randomwallpaper"
-waypaper --folder "$wallpapers_folder" --random &
+
+mapfile -t wallpapers < <(find "$wallpapers_folder" -maxdepth 1 -type f)
+
+if ((${#wallpapers[@]} == 0)); then
+    printf 'No wallpapers found in %s\n' "$wallpapers_folder" >&2
+    exit 1
+fi
+
+selected_wallpaper="${wallpapers[RANDOM % ${#wallpapers[@]}]}"
+"$HOME/.local/bin/waypaper-launch" --wallpaper "$selected_wallpaper"

@@ -56,19 +56,18 @@ install_vscode_extensions() {
 
 read_manifest() {
 	local file="$1"
-	python - "$file" <<'PY'
-from pathlib import Path
-import sys
+	local line
 
-items = []
-for raw in Path(sys.argv[1]).read_text().splitlines():
-    line = raw.strip()
-    if not line or line.startswith('#'):
-        continue
-    items.append(line)
+	while IFS= read -r line || [[ -n "$line" ]]; do
+		line="${line#"${line%%[![:space:]]*}"}"
+		line="${line%"${line##*[![:space:]]}"}"
 
-print("\n".join(items))
-PY
+		if [[ -z "$line" || "$line" == \#* ]]; then
+			continue
+		fi
+
+		printf '%s\n' "$line"
+	done <"$file"
 }
 
 install_pacman() {
@@ -185,7 +184,13 @@ stow_all() {
 			stow --target="$HOME" --restow "$package"
 		else
 			printf 'Skipping stow package %s due to existing unmanaged targets\n' "$package" >&2
-			python -c 'from pathlib import Path; import sys; [print(line) for line in Path(sys.argv[1]).read_text().splitlines() if line.startswith(("WARNING!", "  *", "Ignoring "))]' "$output_file" >&2
+			while IFS= read -r line || [[ -n "$line" ]]; do
+				case "$line" in
+				WARNING\!* | '  '*'Ignoring '*)
+					printf '%s\n' "$line" >&2
+					;;
+				esac
+			done <"$output_file"
 		fi
 
 		rm -f "$output_file"

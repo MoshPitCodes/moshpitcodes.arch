@@ -1,11 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-wallpaper="${1:-}"
-monitor="${2:-}"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper"
+state_file="$state_dir/current"
+restore_mode=0
+wallpaper=""
+fallback_wallpaper=""
+monitor=""
+
+if [[ "${1:-}" == "--restore" ]]; then
+    restore_mode=1
+    fallback_wallpaper="${2:-}"
+    monitor="${3:-}"
+
+    if [[ -s "$state_file" ]]; then
+        wallpaper="$(<"$state_file")"
+    else
+        wallpaper="$fallback_wallpaper"
+    fi
+else
+    wallpaper="${1:-}"
+    monitor="${2:-}"
+fi
 
 if [[ -z "$wallpaper" ]]; then
     printf 'Usage: wall-change <path-to-wallpaper> [monitor]\n' >&2
+    printf '   or: wall-change --restore [fallback-wallpaper] [monitor]\n' >&2
     exit 1
 fi
 
@@ -14,7 +34,7 @@ if [[ ! -f "$wallpaper" ]]; then
     exit 1
 fi
 
-if ! pgrep -x swww-daemon >/dev/null; then
+if ! swww query >/dev/null 2>&1; then
     swww-daemon &
     sleep 1
 fi
@@ -33,4 +53,9 @@ else
         --transition-fps 60 \
         --transition-angle 30 \
         --transition-step 90
+fi
+
+if (( restore_mode == 0 )); then
+    mkdir -p "$state_dir"
+    printf '%s\n' "$wallpaper" >"$state_file"
 fi

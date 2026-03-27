@@ -6,4 +6,5 @@ After=default.target
 Type=oneshot
 ExecStart=%h/.local/bin/backup-repos
 Restart=on-failure
+RestartPreventExitStatus=3
 RestartSec=5min
