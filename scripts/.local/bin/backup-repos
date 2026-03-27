@@ -5,16 +5,33 @@ set -euo pipefail
 source_dir="${BACKUP_REPOS_SOURCE:-$HOME/Development}"
 dest_root="${BACKUP_REPOS_DEST:-}"
 host_name="${BACKUP_REPOS_HOST:-$(hostnamectl hostname 2>/dev/null || hostname)}"
+expected_source="${BACKUP_REPOS_EXPECTED_SOURCE:-}"
 log_file="${XDG_STATE_HOME:-$HOME/.local/state}/backup-repos.log"
-
-mkdir -p "$(dirname "$log_file")"
+log_dir="$(dirname "$log_file")"
 
 log() {
-    printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" | tee -a "$log_file"
+    local message
+
+    message="[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+    if [[ -d "$log_dir" ]]; then
+        printf '%s\n' "$message" | tee -a "$log_file"
+    else
+        printf '%s\n' "$message"
+    fi
+}
+
+safe_skip() {
+    log "$*"
+    exit 3
 }
 
 if [[ -z "$dest_root" ]]; then
     log "ERROR: set BACKUP_REPOS_DEST before running backup-repos"
+    exit 1
+fi
+
+if [[ -z "$expected_source" ]]; then
+    log "ERROR: set BACKUP_REPOS_EXPECTED_SOURCE before running backup-repos"
     exit 1
 fi
 
@@ -24,9 +41,29 @@ if [[ ! -d "$source_dir" ]]; then
 fi
 
 if [[ ! -d "$dest_root" && ! -L "$dest_root" ]]; then
-    log "WARNING: destination $dest_root is not available"
-    exit 0
+    safe_skip "SKIP: destination $dest_root is not available"
 fi
+
+if ! findmnt -T "$dest_root" -no SOURCE >/dev/null 2>&1; then
+    safe_skip "SKIP: destination $dest_root is not backed by a mounted filesystem"
+fi
+
+observed_source="$(findmnt -T "$dest_root" -no SOURCE 2>/dev/null || true)"
+observed_target="$(findmnt -T "$dest_root" -no TARGET 2>/dev/null || true)"
+observed_fstype="$(findmnt -T "$dest_root" -no FSTYPE 2>/dev/null || true)"
+
+log "Observed backup target mount: source=${observed_source:-unknown} target=${observed_target:-unknown} fstype=${observed_fstype:-unknown}"
+log "Expected backup target source: $expected_source"
+
+if [[ -z "$observed_source" ]]; then
+    safe_skip "SKIP: could not determine mounted source for $dest_root"
+fi
+
+if [[ "$observed_source" != "$expected_source" ]]; then
+    safe_skip "SKIP: mounted source mismatch for $dest_root (expected $expected_source, found $observed_source)"
+fi
+
+mkdir -p "$log_dir"
 
 dest_dir="$dest_root/$host_name"
 mkdir -p "$dest_dir"

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="$script_dir:$PATH"
+
+if ! command -v waypaper >/dev/null 2>&1; then
+    printf 'waypaper is not installed. Install the waypaper package first.\n' >&2
+    exit 1
+fi
+
+if ! command -v swww >/dev/null 2>&1; then
+    printf 'waypaper needs the swww backend. Install the swww package first.\n' >&2
+    exit 1
+fi
+
+case "${1:-}" in
+    -h|--help|-v|--version|--list)
+        ;;
+    *)
+        if ! swww query >/dev/null 2>&1; then
+            swww-daemon &
+            sleep 1
+        fi
+        ;;
+esac
+
+if [[ "${1:-}" == "--restore" && ! -d "${XDG_CACHE_HOME:-$HOME/.cache}/awww" ]]; then
+    mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/awww"
+fi
+
+exec waypaper "$@"

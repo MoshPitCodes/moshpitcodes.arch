@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -x /usr/bin/swww-daemon ]]; then
+    exec /usr/bin/swww-daemon "$@"
+fi
+
+if [[ -x /usr/bin/awww-daemon ]]; then
+    case "${1:-}" in
+        -h|--help|-V|--version)
+            exec /usr/bin/awww-daemon "$@"
+            ;;
+    esac
+
+    if pgrep -x awww-daemon >/dev/null 2>&1 || /usr/bin/awww query >/dev/null 2>&1; then
+        exit 0
+    fi
+
+    exec /usr/bin/awww-daemon "$@"
+fi
+
+printf 'Neither swww-daemon nor awww-daemon is installed.\n' >&2
+exit 1
