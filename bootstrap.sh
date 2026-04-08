@@ -109,7 +109,10 @@ install_flatpak() {
 	fi
 
 	while IFS= read -r app; do
-		flatpak install -y flathub "$app"
+		# Install manifest apps to the user Flatpak installation so unattended
+		# bootstrap runs stay deterministic when remotes like flathub exist in
+		# both user and system scopes.
+		flatpak install --user -y flathub "$app"
 	done < <(read_manifest "$repo_root/packages/flatpak.txt")
 }
 
@@ -173,6 +176,76 @@ backup_conflicting_targets() {
 	done
 }
 
+has_directory_parents() {
+	local target="$1"
+	local parent
+
+	parent="$(dirname "$target")"
+	while [[ "$parent" != "$HOME" && "$parent" != "/" ]]; do
+		if [[ -e "$parent" && ! -d "$parent" ]]; then
+			printf 'Cannot reconcile %s because parent path %s is not a directory; leaving target unchanged so stow can skip safely\n' "$target" "$parent" >&2
+			return 1
+		fi
+		parent="$(dirname "$parent")"
+	done
+
+	if [[ -e "$HOME" && ! -d "$HOME" ]]; then
+		printf 'Cannot reconcile %s because HOME path %s is not a directory\n' "$target" "$HOME" >&2
+		return 1
+	fi
+
+	return 0
+}
+
+reconcile_known_target() {
+	local package="$1"
+	local relative_target="$2"
+	local source="$repo_root/$package/$relative_target"
+	local target="$HOME/$relative_target"
+	local backup_target="$target.bootstrap-unmanaged.bak"
+	local target_realpath
+	local source_realpath
+
+	if [[ ! -e "$source" ]]; then
+		return 0
+	fi
+
+	if ! has_directory_parents "$target"; then
+		return 0
+	fi
+
+	if [[ ! -e "$target" && ! -L "$target" ]]; then
+		return 0
+	fi
+
+	if [[ -L "$target" ]]; then
+		target_realpath="$(readlink -f -- "$target" 2>/dev/null || true)"
+		source_realpath="$(readlink -f -- "$source")"
+		if [[ -n "$target_realpath" && "$target_realpath" == "$source_realpath" ]]; then
+			return 0
+		fi
+	fi
+
+	if cmp -s -- "$target" "$source"; then
+		rm -f -- "$target"
+		return 0
+	fi
+
+	mkdir -p -- "$(dirname "$backup_target")"
+	mv -f -- "$target" "$backup_target"
+}
+
+reconcile_known_stow_conflicts() {
+	reconcile_known_target micro .config/micro/settings.json
+	reconcile_known_target micro .config/micro/bindings.json
+	reconcile_known_target micro .config/micro/colorschemes/everforest.micro
+	reconcile_known_target micro .config/micro/colorschemes/tokyonight-night.micro
+	reconcile_known_target micro .config/micro/syntax/asm.yaml
+	reconcile_known_target xdg .config/mimeapps.list
+	reconcile_known_target xdg .config/fontconfig/fonts.conf
+	reconcile_known_target xdg .local/share/applications/waypaper.desktop
+}
+
 stow_all() {
 	local package
 	local output_file
@@ -202,6 +275,7 @@ install_pacman
 install_aur
 install_flatpak
 backup_conflicting_targets
+reconcile_known_stow_conflicts
 stow_all
 import_local_secrets
 apply_desktop_preferences
