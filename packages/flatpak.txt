@@ -1,2 +1,4 @@
 # Add optional GUI apps here if you prefer Flatpak over pacman/AUR.
+# bootstrap.sh installs this manifest into the user Flatpak installation.
 com.github.tchx84.Flatseal
+com.usebottles.bottles
